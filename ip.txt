@@ -1,0 +1,90 @@
+﻿1.使用的类
+2.获取本地主机IP地址
+3.远程查询4.实现网段
+的扫描
+1.先介绍一下使用的类：
+DNS类：在.net中的System.net命名空间下，主要的功能是从 Internet 域名系统 (DNS) 检索关于特定主机的信息。
+IPHostEntry类：将一个域名系统 (DNS) 主机与一组别名和一组匹配的 IP 地址关联，和DNS类一起使用。
+IPAddress 类：IP 网络上的地址。
+使用的命名空间有：
+System.Net 命名空间为当前网络上使用的多种协议提供了简单的编程接口.
+System.IO命名空间包含允许在数据流和文件上进行同步和异步读取及写入的类型。
+System.Thread 命名空间主要是用来多线程序编程。
+程序实现以下几个功能：
+2.获取本地主机IP地址
+//对Button控件的事件的响应
+private void buttion1_click(object sender,System.Event.Args e)
+   {
+IPHostEntry myHost = new IPHostEntry();
+Try
+{
+  // Dns.GetHostName()获取本地计算机的主机名
+  // Dns.GetHostByName()获取指定 DNS 主机名的 DNS 信息
+  //得到本地主机的DNS信息
+  myHost = Dns.GetHostByName(Dns.GetHostName());
+  //显示本地主机名
+textBox1.Text = myHost.HostName.ToString();
+//显示本地主机的IP地址表
+for(int i=0; i<myHost.AddressList.length;i++)
+{
+   richTextBox1.AppendText(“本地主机IP地址->”+myHost.AddressList[i].ToString()+”\r”);
+}
+                catch(Exception error)
+				{
+					MessageBox.Show(error.Message);
+                }
+}//private
+3.远程查询
+  private void buttion2_click(object Sender,System.EventArgs e)
+{
+   IPHostEntry myDnsToIP = new IPHostEntry();
+  //Dns.Resolve 方法: 将 DNS 主机名或以点分隔的四部分表示法格式的 //  IP 地址解析为 IPHostEntry实例
+myDnsToIP =Dns.Resolve(textBox2.Text.ToString());
+//显示此域名的IP地址的列表
+for(int i=0;i<myDnsToIPAddressList.Length;i++)
+{
+ 	rich.TextBox1.AppendText(textBox2.Text+”的IP地址是”+myDnsToIP.AddressList[i].ToString()+”\r”);
+}
+}
+4.实现网段的扫描
+实现网段的扫描，确定网络中正在使用的主机数目。这里使用了多线程技术，增加了一个线程，为了防止程序扫描的时间过长，影响程序的响应。不过在.net中由于使用了垃圾收集技术所以对线程的控制也不是很复杂的。
+private void button3_click(object sender, System.EventArgs e)
+{
+	//Thread 类: 创建并控制线程
+	Thread thScan = new thread(new ThreadStrart(ScanTarget));
+	//Thread.Start 方法:启动线程
+	thScan.Strart();
+  }
+	private void ScanTarget()
+	{
+		//构造IP地址的31-8BIT 位，也就是固定的IP地址的前段
+		// numericUpDown1是定义的System.Windows.Forms.NumericUpDown控件
+	string strIPAddress=numericUpDown1.Text+”.”+numericUpDown2.Text+”.”+numericUpDown3.Text+”.”;
+      //开始扫描地址
+      int nStrat = Int32.Parse(numericUpDown4.Text);
+		//终止扫描地址
+      int nEnd =Int32.Parse(numericUpDown5.Text);
+		//扫描的操作
+		for(int i=nStrat;i<=nEnd;i++)
+		{
+			string strScanIPAdd = strIPAddress +i.ToString();
+			//转换成IP地址
+			IPAddress myScanIP = IPAddress.Parse(strScanIPAdd);
+			try
+			{
+				//你可以加入自已的,增强功能
+	// Dns.GetHostByAddress 方法: 根据 IP 地
+//址获取 DNS 主机信息。
+IPHostEntry myScanHost = 
+Dns.GetHostByAddress(myScanIP);
+//获取主机的名
+string strHostName =myScanHost.HostName.ToString();
+richTextBox1.AppendText(strScanIPAdd+”->”+strHostName+”\r”);
+			}
+			catch(Exception error)
+			{
+				MessageBox.Show(error.Message);
+			}
+		}//for	
+  }//private
+到此为止一个简单用C#实现扫描器的主要功能就完成了，试一下你可以看到你的网络上的主机，有没有成就感了：）
